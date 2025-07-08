@@ -1,0 +1,66 @@
+.carousel {
+    position: relative;
+    width: 100%;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.carousel img { 
+    min-width: 200px;
+    max-width: 250px;
+    height: 150px;
+    object-fit: cover;
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.carousel img.active {
+    opacity: 1;
+}
+
+.card {
+    background-color: azure;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.02);
+    background-color: lightcyan;
+}
+
+.card:hover .game-description {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.game-description {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.date-button {
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.date-button:hover {
+    background-color: blue;
+    transform: scale(1.05);
+}
+
+.date-button.active {
+    background-color: green !important;
+    transform: scale(1.05);
+}
+
+#bookingsModal {
+    display: none;
+}
+
+#bookingsModal.show {
+    display: flex;
+}

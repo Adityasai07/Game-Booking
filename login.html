@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="signup.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+</head>
+<body>
+    <div class="nav-buttons">
+        <a href="signup.html"><button type="button">signup</button></a>
+        <a href="index.html"><button type="button">Home</button></a>
+    </div>
+    <h2>Login</h2>
+    <form id="loginForm">
+        <input type="text" name="username" placeholder="Username" required><br><br>
+        <div style="position: relative;">
+            <input type="password" name="password" id="passwordInput" placeholder="Password" required >
+            <span onclick="togglePassword()" 
+                class="material-icons" 
+                id="eyeIcon"
+                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                visibility
+            </span>
+        </div>
+        <p><a href="forgot_password.html">Forgot Password?</a></p>
+        <button type="submit">Login</button>
+    </form>
+
+    <p id="message"></p>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            fetch("login.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById("message").innerText = data;
+                if (data.includes("Success")) {
+                    window.location.href = "index.html"
+                }
+            })
+            .catch(err => console.log("Login error: " + err));
+        });
+        function togglePassword() {
+            const input = document.getElementById("passwordInput");
+            const icon = document.getElementById("eyeIcon");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.textContent = "visibility_off";
+            } else {
+                input.type = "password";
+                icon.textContent = "visibility";
+            }
+        }
+
+    </script>
+</body>
+</html>
+
+

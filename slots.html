@@ -1,0 +1,491 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Your Slot</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="slots.css">
+</head>
+<body class="bg-gray-100 font-sans antialiased">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <header class="flex items-center p-4 bg-gray-800 text-white rounded-lg shadow-lg mb-6">
+            <a href="index.html" title="Home" class="material-icons text-white hover:text-blue-300 text-2xl">home</a>
+            <h2 class="text-3xl font-bold">Book Your Slot</h2>
+        </header>
+
+        <div class="layout-container">
+            <div class="left-panel">
+                <div id="gameInfo" class="overflow-hidden"></div>
+                <div class="date-nav flex gap-3 overflow-x-auto mt-4" id="dateNav"></div>
+            </div>
+
+            <div class="right-panel">
+                <div id="imageCarousel" class="carousel"></div>
+            </div>
+        </div>
+
+        <div id="slotContainer" class="slots-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-8"></div>
+
+        <div id="confirmModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Confirm Booking</h2>
+                    <button id="closeConfirmModal" class="text-gray-600 hover:text-gray-800">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+                <p class="text-gray-600 mb-2">OTP will be sent to your registered email.</p>
+                <button id="sendOtp" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mb-3">Send OTP</button>
+                <input type="text" id="otpInput" placeholder="Enter OTP" class="w-full mb-3 px-3 py-2 border rounded focus:outline-none focus:ring" />
+                <button id="verifyOtp" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 mb-3">Verify OTP</button>
+
+                
+                <p class="text-gray-600 mb-4">Are you sure you want to book this slot?</p>
+                <div class="flex justify-end gap-4">
+                    <button id="cancelBooking" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancel</button>
+                    <button id="confirmBooking" class="px-4 py-2 bg-red-200 text-white rounded" disabled>Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="messageModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="messageTitle" class="text-xl font-bold text-gray-800"></h2>
+                    <button id="closeMessageModal" class="text-gray-600 hover:text-gray-800">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+                <p id="messageText" class="text-gray-600 mb-4"></p>
+                <div class="flex justify-end">
+                    <button id="ticketMessage" class="px-4 py-2 mr-4 bg-green-600 text-white rounded-md hover:bg-green-700">Ticket</button>
+                    <button id="okayMessage" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Okay</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="ticketModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md font-mono relative border-2    border-black">
+                <h2 class="text-2xl font-bold text-center border-b pb-2 mb-4">Game Booking Ticket</h2>
+
+                <div id="ticketContent" class="space-y-3 text-sm">  
+                </div>
+
+                <div class="flex justify-center mt-6 border-t pt-4">
+                <button onclick="closeTicketModal()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="messageBox" class="fixed top-4 right-4 w-80 z-50"></div>
+        <template id="messageTemplate">
+            <div class="message bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative shadow-lg mb-4" role="alert">
+                <strong class="font-bold">Notice: </strong>
+                <span class="block sm:inline message-text"></span>
+                <span onclick="this.parentElement.remove()" class="absolute top-1 right-2 text-xl font-bold cursor-pointer text-blue-700 hover:text-blue-900">&times;</span>
+            </div>
+        </template>
+    </div>
+
+    <script>
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameId = urlParams.get('game_id');
+        let selectedDate = urlParams.get('date') || new Date().toISOString().split('T')[0]; // Fallback to today
+        const gameInfo = document.getElementById("gameInfo");
+        const slotContainer = document.getElementById("slotContainer");
+        const imageCarousel = document.getElementById("imageCarousel");
+        const dateNav = document.getElementById("dateNav");
+
+
+
+        const confirmModal = document.getElementById("confirmModal");
+        const messageModal = document.getElementById("messageModal");
+        const closeConfirmModal = document.getElementById("closeConfirmModal");
+        const cancelBooking = document.getElementById("cancelBooking");
+        const confirmBooking = document.getElementById("confirmBooking");
+        const closeMessageModal = document.getElementById("closeMessageModal");
+        const okayMessage = document.getElementById("okayMessage");
+        const messageTitle = document.getElementById("messageTitle");
+        const messageText = document.getElementById("messageText");
+        const ticketMessage = document.getElementById("ticketMessage");
+
+        // date nav
+        function formatDate(d) {
+            return d.toISOString().split('T')[0];
+        }
+
+        function renderDateNav() {
+            dateNav.innerHTML = '';
+            const baseDate = new Date(selectedDate);
+
+            for (let offset = -3; offset <= 3; offset++) {
+                const d = new Date(baseDate);
+                d.setDate(baseDate.getDate() + offset);
+                const formatted = formatDate(d);
+
+                const day = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(); // MON, TUE
+                const dateNum = d.getDate().toString().padStart(2, '0'); // 01, 02
+                const month = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(); // JUL
+                const isSelected = formatted === selectedDate;
+                const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+
+                const btn = document.createElement("div");
+                btn.className = `flex flex-col items-center px-3 py-2 rounded-lg cursor-pointer text-sm 
+                                ${isSelected ? "bg-blue-500 text-white font-bold hover:bg-blue-700" : ""} 
+                                ${!isSelected && isWeekend ? "text-red-500 cursor-not-allowed hover:bg-red-100" : "text-black-700 hover:bg-gray-200"}`;
+
+                btn.innerHTML = `
+                    <div class="text-xs ${isSelected ? "text-white" : ""}">${day}</div>
+                    <div class="text-lg font-semibold ${isSelected ? "text-white" : ""}">${dateNum}</div>
+                    <div class="text-xs ${isSelected ? "text-white" : ""}">${month}</div>
+                `;
+                
+                btn.onclick = () => {
+                    selectedDate = formatted;
+                    renderDateNav();
+                    loadSlots(); // your function to load relevant data
+                };
+
+                dateNav.appendChild(btn);
+            }
+        }
+
+
+
+        function startCarousel() {
+            const images = imageCarousel.querySelectorAll("img");
+            if (images.length <= 0) return;
+            let currentIndex = 0;
+
+            function showNextImage() {
+                images[currentIndex].classList.remove("active");
+                currentIndex = (currentIndex + 1) % images.length;
+                images[currentIndex].classList.add("active");
+            }
+
+            images[currentIndex].classList.add("active");
+            setInterval(showNextImage, 2000); 
+        }
+
+        function loadGameInfo() {
+            fetch(`fetch_game_details.php?game_id=${gameId}`)
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    gameInfo.innerHTML = `
+                        <h3 class="text-2xl font-semibold text-gray-800">${data.gamename}</h3>
+                        <p class="text-gray-600 mt-2 max-h-40 overflow-y-auto pr-2">${data.description}</p>
+                    `;
+
+                    imageCarousel.innerHTML = '';
+                    if (!data.images || !Array.isArray(data.images) || data.images.length === 0) {
+                        console.warn('No images found in data.images:', data.images);
+                        imageCarousel.innerHTML = '<p class="text-gray-600">No images available.</p>';
+                        return;
+                    }
+
+                    data.images.forEach((path, index) => {
+                        console.log(`Loading image ${index + 1}: ${path}`);
+                        const img = document.createElement("img");
+                        img.src = "Admin/" + path;
+                        img.alt = `Game image ${index + 1}`;
+                        img.className = "rounded-lg shadow-md";
+                        img.onerror = () => {
+                            console.error(`Failed to load image: ${path}`);
+                            img.src = 'noimage.jpeg'; 
+                            img.alt = 'Image not found';
+                        };
+                        imageCarousel.appendChild(img);
+                    });
+
+                    startCarousel(); 
+                })
+                .catch(error => {
+                    console.error('Error fetching game details:', error);
+                    imageCarousel.innerHTML = '<p class="text-red-500">Failed to load images.</p>';
+                });
+        }
+
+
+        function loadSlots() {
+            // get “today” and “now” in local time
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+            fetch(`fetch_slots.php?game_id=${gameId}&date=${selectedDate}`)
+                .then(res => {
+                if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                return res.json();
+                })
+                .then(slots => {
+                slotContainer.innerHTML = '';
+                if (slots.length === 0) {
+                    slotContainer.innerHTML = '<p class="text-gray-600 col-span-full text-center">No slots available.</p>';
+                    return;
+                }
+
+                slots.forEach(slot => {
+                    const btn = document.createElement("button");
+                    btn.textContent = slot.slot_time;
+                    btn.classList.add("slot", "px-4", "py-3", "rounded-md", "text-white", "text-center");
+
+                    const [h, m] = slot.slot_time.split(':').map(Number);
+                    console.log(h + " - " + m);
+                    const slotMinutes = h * 60 + m;
+
+                    const isPastDate = selectedDate < todayStr;
+                    const isPastTime = selectedDate === todayStr && slotMinutes <= currentMinutes;
+                    const isPast = isPastDate || isPastTime;
+
+                    if (isPast) {
+                        btn.classList.add("past");
+                        btn.disabled = true;
+                    } else if (slot.booking_id) {
+                        btn.classList.add("bg-red-600", "cursor-not-allowed");
+                        btn.disabled = true;
+                    } else {
+                        btn.classList.add("bg-green-600");
+                        btn.onclick = () => bookSlot(slot.id);
+                    }
+                    slotContainer.appendChild(btn);
+                
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching slots:', error);
+                slotContainer.innerHTML = '<p class="text-red-500 col-span-full text-center">Failed to load slots.</p>';
+            });
+        }
+
+
+
+
+        function bookSlot(slotId) {
+            confirmBooking.dataset.slotId = slotId;
+            confirmModal.classList.add('show');
+        }
+
+        // Modal event listeners
+        closeConfirmModal.addEventListener('click', () => {
+            confirmModal.classList.remove('show');
+        });
+
+        cancelBooking.addEventListener('click', () => {
+            confirmModal.classList.remove('show');
+        });
+
+        confirmBooking.addEventListener('click', () => {
+            const slotId = confirmBooking.dataset.slotId;
+            confirmModal.classList.remove('show');
+
+            fetch('book_slot.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ slot_id: slotId }) // { "slot_id" : slotId} 
+                //JS object → JSON string	JSON.stringify()
+                //JSON string → JS object	JSON.parse()
+                //PHP reads JSON request	file_get_contents("php://input") + json_decode()
+            })
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    messageTitle.textContent = 'Booking Successful';
+                    messageText.textContent = `Booking successful! Booking ID: ${data.booking_id}`;
+                    ticketMessage.onclick = () => viewTicket(data.booking_id);
+                } else {
+                    messageTitle.textContent = 'Booking Failed';
+                    messageText.textContent = `Booking failed: ${data.message}`;
+                }
+                messageModal.classList.add('show');
+                if (data.success) {
+                    showMessage(data.message);
+                    loadSlots(); // Refresh slots after successful booking
+                }
+            })
+            .catch(error => {
+                console.error('Error booking slot:', error);
+                messageTitle.textContent = 'Booking Failed';
+                messageText.textContent = 'Booking failed: Unable to process request.';
+                messageModal.classList.add('show');
+            });
+        });
+
+        closeMessageModal.addEventListener('click', () => {
+            messageModal.classList.remove('show');
+        });
+
+        okayMessage.addEventListener('click', () => {
+            messageModal.classList.remove('show');
+        });
+
+        const sendOtp = document.getElementById("sendOtp");
+        const verifyOtp = document.getElementById("verifyOtp");
+        const otpInput = document.getElementById("otpInput");
+        confirmBooking.disabled = true;
+
+        let canSendOtpConfirm = true;
+
+        sendOtp.addEventListener('click', () => {
+        if (!canSendOtpConfirm) {
+            showMessage('Please wait before sending OTP again.', 'error');
+            return;
+        }
+
+        console.log("sending otp");
+        fetch('send_otp_confirm.php')
+            .then(res => res.json())
+            .then(msg => {
+            if (msg.success) {
+                showMessage(msg.message);
+
+                canSendOtpConfirm = false;
+                let countdown = 60;
+                sendOtp.disabled = true;
+                const originalText = sendOtp.textContent;
+                sendOtp.textContent = `Resend OTP in ${countdown}s`;
+
+                const interval = setInterval(() => {
+                countdown--;
+                sendOtp.textContent = `Resend OTP in ${countdown}s`;
+
+                if (countdown === 0) {
+                    clearInterval(interval);
+                    canSendOtpConfirm = true;
+                    sendOtp.disabled = false;
+                    sendOtp.textContent = originalText;
+                }
+                }, 1000);
+
+            } else {
+                showMessage("Failed to send mail", 'error');
+            }
+            })
+            .catch(err => {
+                console.error(err);
+                showMessage("Something went wrong", "error");
+            });
+        });
+
+
+        // Verify OTP when button is clicked
+        verifyOtp.addEventListener('click', () => {
+            const otp = otpInput.value.trim();
+            if (otp.length !== 4) {
+                showMessage("Invalid Input", "OTP must be 4 digits.");
+                return;
+            }
+
+            fetch('verify_booking.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ otp })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.valid) {
+                    showMessage("OTP Verified", "You may now confirm the booking.");
+                    confirmBooking.disabled = false;
+                    confirmBooking.classList.remove("bg-red-200");
+                    confirmBooking.classList.add("bg-green-600");
+                    
+
+                } else {
+                    showMessage("Invalid OTP", "Please check and re-enter the OTP.");
+                    confirmBooking.disabled = true;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showMessage("Error", "OTP verification failed.");
+            });
+        });
+
+
+
+
+            // ticket        
+            function viewTicket(bookingId) {
+            fetch(`fetch_ticket.php?booking_id=${bookingId}`)
+                .then(res => res.json())
+                .then(data => {
+                if (!data.success) {
+                    showMessage("Ticket not found.", "error");
+                    return;
+                }
+
+                const t = data.ticket;
+                const content = `
+                    <div class="flex justify-between border-b pb-2">
+                    <p><strong>Booking ID:</strong> #${t.booking_id}</p>
+                    <p><strong>Date:</strong> ${t.game_date}</p>
+                    </div>
+
+                    <div class="flex justify-between">
+                    <p><strong>Game:</strong> ${t.gamename}</p>
+                    <p><strong>Time:</strong> ${t.slot_time}</p>
+                    </div>
+
+                    <div class="flex justify-between border-t pt-2">
+                    <p><strong>Name:</strong> ${t.username}</p>
+                    <p><strong>Phone:</strong> ${t.phone_number}</p>
+                    </div>
+
+                    <p class="text-xs text-gray-500 text-center mt-4">Booked At: ${t.booked_at}</p>
+                `;
+
+                document.getElementById("ticketContent").innerHTML = content;
+                document.getElementById("ticketModal").classList.remove("hidden");
+                })
+                .catch(err => {
+                console.error(err);
+                showMessage("Something went wrong", "error");
+                });
+            }
+
+            function closeTicketModal() {
+            document.getElementById("ticketModal").classList.add("hidden");
+            }
+
+
+            // showmessages 
+            function showMessage(text, type = "info") {
+                    const template = document.getElementById("messageTemplate");
+                    const clone = template.content.cloneNode(true);
+                    const box = clone.querySelector(".message");
+                    const msgText = clone.querySelector(".message-text");
+
+                    msgText.textContent = text;
+
+                    if (type === "error") {
+                        box.className = "message bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative shadow-lg mb-4";
+                    } else if (type === "success") {
+                        box.className = "message bg-blue-600 border border-green-400 text-green-700 px-4 py-3 rounded relative shadow-lg mb-4";
+                    }
+
+                    const container = document.getElementById("messageBox");
+                    const messageNode = box;
+                    container.appendChild(messageNode);
+
+                    setTimeout(() => {
+                        messageNode.remove();
+                    }, 5000);
+                }
+
+
+        renderDateNav();
+        loadGameInfo();
+        loadSlots();
+    </script>
+</body>
+</html>

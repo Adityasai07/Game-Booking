@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="signup.css">
+</head>
+<body>
+    <div class="nav-buttons">
+        <a href="signup.html"><button type="button">signup</button></a>
+        <a href="admin.html"><button type="button">Home</button></a>
+    </div>
+    <h2>Admin Login</h2>
+    <form id="loginForm">
+        <input type="text" name="username" placeholder="Username" required><br><br>
+        <input type="password" name="password" placeholder="Password" required><br><br>
+        <button type="submit">Admin Login</button>
+    </form>
+
+    <p id="message"></p>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            fetch("login.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.text())
+            .then(data => {
+                console.log("enteredddd");
+                document.getElementById("message").innerText = data;
+                if (data.includes("Success")) {
+                    console.log("Success");
+                    window.location.href = "admin.html"
+                }
+            })
+            .catch(err => console.log("Login error: " + err));
+        });
+    </script>
+</body>
+</html>

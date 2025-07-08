@@ -1,0 +1,8 @@
+vendor
+token_send.json
+token.json
+credentials.json
+config.json
+composer.lock
+composer.json
+Admin/config.json

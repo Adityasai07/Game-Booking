@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gmail API - Send Email</title>
+  <meta charset="UTF-8" />
+</head>
+<body>
+  <h2>Gmail API - Send Email</h2>
+
+  <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+  <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
+
+  <hr />
+
+  <div>
+    <input type="email" id="email_to" placeholder="Recipient Email" style="width: 300px;" /><br /><br />
+    <input type="text" id="email_subject" placeholder="Subject" style="width: 300px;" /><br /><br />
+    <textarea id="email_body" placeholder="Message body" rows="8" cols="60"></textarea><br /><br />
+    <button onclick="sendEmail()">Send Email</button>
+  </div>
+
+  <pre id="content" style="white-space: pre-wrap; margin-top: 20px;"></pre>
+
+  <script type="text/javascript">
+    const CLIENT_ID = ''; // Replace this
+    const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest';
+    const SCOPES = 'https://www.googleapis.com/auth/gmail.send';
+
+    let tokenClient;
+    let gapiInited = false;
+    let gisInited = false;
+
+    document.getElementById('authorize_button').style.visibility = 'hidden';
+    document.getElementById('signout_button').style.visibility = 'hidden';
+
+    function gapiLoaded() {
+      gapi.load('client', initializeGapiClient);
+    }
+
+    async function initializeGapiClient() {
+      await gapi.client.init({
+        discoveryDocs: [DISCOVERY_DOC],
+      });
+      gapiInited = true;
+      maybeEnableButtons();
+    }
+
+    function gisLoaded() {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '', // set later
+      });
+      gisInited = true;
+      maybeEnableButtons();
+    }
+
+    function maybeEnableButtons() {
+      if (gapiInited && gisInited) {
+        document.getElementById('authorize_button').style.visibility = 'visible';
+      }
+    }
+
+    function handleAuthClick() {
+      tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+          throw resp;
+        }
+        document.getElementById('signout_button').style.visibility = 'visible';
+        document.getElementById('authorize_button').innerText = 'Refresh Token';
+        document.getElementById('content').innerText = 'Authorized!';
+      };
+
+      if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({ prompt: 'consent' });
+      } else {
+        tokenClient.requestAccessToken({ prompt: '' });
+      }
+    }
+
+    function handleSignoutClick() {
+      const token = gapi.client.getToken();
+      if (token !== null) {
+        google.accounts.oauth2.revoke(token.access_token);
+        gapi.client.setToken('');
+        document.getElementById('authorize_button').innerText = 'Authorize';
+        document.getElementById('signout_button').style.visibility = 'hidden';
+        document.getElementById('content').innerText = '🚪 Signed out.';
+      }
+    }
+
+    async function sendEmail() {
+      const to = document.getElementById('email_to').value;
+      const subject = document.getElementById('email_subject').value;
+      const body = document.getElementById('email_body').value;
+
+      if (!to || !subject || !body) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const messageParts = [
+        `To: ${to}`,
+        `Subject: ${subject}`,
+        "Content-Type: text/plain; charset=utf-8",
+        "MIME-Version: 1.0",
+        "",
+        body,
+      ];
+
+      const rawMessage = messageParts.join('\n');
+      const encodedMessage = btoa(rawMessage)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+
+      try {
+        const sendResponse = await gapi.client.gmail.users.messages.send({
+          userId: 'me',
+          resource: {
+            raw: encodedMessage,
+          },
+        });
+        document.getElementById('content').innerText = `Email sent!\n Message ID: ${sendResponse.result.id}`;
+      } catch (err) {
+        document.getElementById('content').innerText = `Error: ${err.message}`;
+      }
+    }
+  </script>
+
+  <!-- Google API and Identity scripts -->
+  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+</body>
+</html>

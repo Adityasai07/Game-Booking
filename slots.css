@@ -1,0 +1,79 @@
+/* Layout container for responsive left-right panel structure */
+.layout-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* spacing between panels */
+}
+
+@media (min-width: 1024px) {
+    .layout-container {
+        flex-direction: row;
+        height: 275px; /* Make both panels same height */
+    }
+
+    .left-panel {
+        width: 60%;
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .right-panel {
+        width: 40%;
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Carousel styling */
+.carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel img {
+    max-width: 90%;
+    max-height: 180px;
+    object-fit: cover;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.carousel img.active {
+    opacity: 1;
+}
+
+/* Modal visibility control */
+.modal {
+    display: none;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.slot.past {
+    background-color: lightgray;
+    cursor: not-allowed;   
+    color: black;
+}
+

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin - Bookings</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link rel="icon" href="data:,">
+</head>
+<body class="bg-blue-100 font-sans">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <header class="flex flex-wrap justify-between items-center p-4 bg-gray-800 text-white rounded-lg mb-6">
+      <div class="flex items-center space-x-4">
+        <a href="admin.html" title="Home" class="material-icons text-white hover:text-blue-300 text-2xl">home</a>
+        <h2 class="text-2xl font-bold text-white">Admin Bookings</h2>
+      </div>
+    </header>
+
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <div class="mb-10">
+        <h3 class="text-xl font-semibold text-green-700 mb-4">Upcoming Bookings</h3>
+        <table class="w-full table-auto text-sm border">
+          <thead class="bg-green-100">
+            <tr>
+              <th class="p-2 border">User</th>
+              <th class="p-2 border">Phone</th>
+              <th class="p-2 border">Game</th>
+              <th class="p-2 border">Date</th>
+              <th class="p-2 border">Time</th>
+            </tr>
+          </thead>
+          <tbody id="upcomingBookings"></tbody>
+        </table>
+      </div>
+
+      <div>
+        <h3 class="text-xl font-semibold text-red-700 mb-4">Completed Bookings</h3>
+        <table class="w-full table-auto text-sm border">
+          <thead class="bg-red-100">
+            <tr>
+              <th class="p-2 border">User</th>
+              <th class="p-2 border">Phone</th>
+              <th class="p-2 border">Game</th>
+              <th class="p-2 border">Date</th>
+              <th class="p-2 border">Time</th>
+            </tr>
+          </thead>
+          <tbody id="completedBookings"></tbody>
+        </table>
+      </div>
+      <div class="mt-10">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Cancelled Bookings</h3>
+        <table class="w-full table-auto text-sm border">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="p-2 border">User</th>
+              <th class="p-2 border">Phone</th>
+              <th class="p-2 border">Game</th>
+              <th class="p-2 border">Date</th>
+              <th class="p-2 border">Time</th>
+              <th class="p-2 border">Reason</th>
+            </tr>
+          </thead>
+          <tbody id="cancelledBookings"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    fetch("fetch_bookings.php")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success) return;
+
+        const upcoming = document.getElementById("upcomingBookings");
+        const completed = document.getElementById("completedBookings");
+        const cancelled = document.getElementById("cancelledBookings");
+
+        data.upcoming.forEach((b) => {
+          upcoming.innerHTML += `
+            <tr>
+              <td class="p-2 border">${b.username}</td>
+              <td class="p-2 border">${b.phone_number}</td>
+              <td class="p-2 border">${b.gamename}</td>
+              <td class="p-2 border">${b.game_date}</td>
+              <td class="p-2 border">${b.slot_time}</td>
+            </tr>`;
+        });
+
+        data.completed.forEach((b) => {
+          completed.innerHTML += `
+            <tr>
+              <td class="p-2 border">${b.username}</td>
+              <td class="p-2 border">${b.phone_number}</td>
+              <td class="p-2 border">${b.gamename}</td>
+              <td class="p-2 border">${b.game_date}</td>
+              <td class="p-2 border">${b.slot_time}</td>
+            </tr>`;
+        });
+
+        data.cancelled.forEach((b) => {
+          cancelled.innerHTML += `
+            <tr>
+              <td class="p-2 border">${b.username}</td>
+              <td class="p-2 border">${b.phone_number}</td>
+              <td class="p-2 border">${b.gamename}</td>
+              <td class="p-2 border">${b.game_date}</td>
+              <td class="p-2 border">${b.slot_time}</td>
+              <td class="p-2 border text-red-700">${b.reason}</td>
+            </tr>`;
+        });
+      })
+      .catch((err) => {
+        console.error("Error loading bookings:", err);
+      });
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+    background-color: whitesmoke;
+    color: #333;
+}
+
+h1, h2 {
+    color: darkblue;
+}
+
+label {
+    display: block;
+    margin: 10px 0 5px;
+}
+
+input[type="text"],
+textarea,
+input[type="date"] {
+    width: 300px;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 8px 16px;
+    margin-top: 10px;
+    background-color: skyblue;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: blue;
+}
+
+#dateList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.date-btn {
+    padding: 6px 12px;
+    border: 1px solid black;
+    border-radius: 4px;
+    background-color: white;
+    color:black;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.date-btn:hover {
+    background-color:azure;
+    color:black;
+}
+
+.date-btn.selected {
+    background-color: green;
+    color: white;
+    font-weight: bold;
+}
+

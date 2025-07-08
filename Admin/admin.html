@@ -1,0 +1,162 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Admin - Game Management</title>
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="icon" href="data:,">
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body class="bg-blue-100 font-sans">
+        
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <header class="flex flex-wrap justify-between items-center p-4 bg-gray-800 text-white rounded-lg mb-6">
+            
+                <div class="flex items-center space-x-4">
+                    <a href="admin.html" title="Home" class="material-icons text-white hover:text-blue-300 text-2xl">home</a>
+                    <a href="#" id="bookingsLink" title="My Bookings" class="material-icons text-white hover:text-blue-300 text-2xl">event</a>
+                    <h2 class="text-2xl font-bold text-white">Admin Page - Game Booking</h2>
+                </div>
+            
+            
+                <div class="flex space-x-4 mt-2 sm:mt-0 items-center">
+                    <span id="userMessage" class="text-white text-sm"></span>
+                    <a href="login.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white text-sm" id="loginLink">Login</a>
+                    <a href="signup.html" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md text-white text-sm" id="signupLink">Sign Up</a>
+                    <form action="logout.php" method="POST" id="logoutForm" style="display: none;">
+                        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </header>
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <div id="manualBookingSection" class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md mb-10">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Manual Slot Booking</h2>
+                    <form id="manualBookingForm" class="space-y-6">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Select User</label>
+                            <select id="userSelect" name="user_id" required class="w-full p-3 border border-gray-300 rounded-md shadow-sm">
+                                <option value="">-- Select User --</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Select Game</label>
+                            <select id="gameSelect" name="game_id" required class="w-full p-3 border border-gray-300 rounded-md shadow-sm">
+                                <option value="">-- Select Game --</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Select Date</label>
+                            <select id="dateSelect" name="game_date_id" required class="w-full p-3 border border-gray-300 rounded-md shadow-sm">
+                                <option value="">-- Select Date --</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Select Slot</label>
+                            <select id="slotSelect" name="game_slot_id" required class="w-full p-3 border border-gray-300 rounded-md shadow-sm">
+                                <option value="">-- Select Slot --</option>
+                            </select>
+                        </div>
+
+                        <div class="text-right">
+                            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700" disabled id="submitManualBooking">
+                                Confirm Booking
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                
+                <div id="gameDetailsSection" class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md mb-8">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Add Game</h2>
+                    <form id="gameForm" enctype="multipart/form-data" class="space-y-6">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Game Name</label>
+                            <input type="text" name="gamename" required class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Description</label>
+                            <textarea name="description" required rows="6" class="w-full p-3 border border-gray-300 rounded-md shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Upload Images</label>
+                            <input type="file" name="images[]" multiple accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:border-0 file:rounded-md file:bg-blue-600 file:text-white hover:file:bg-blue-700" />
+                        </div>
+
+                        <div class="text-right">
+                            <button type="button" onclick="goToDateSection()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+                                Next
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Section 2: Date Selection -->
+                <div id="dateSection" class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md" style="display: none;">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Select Game Dates</h2>
+
+                    <div class="flex flex-wrap gap-6 mb-6">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">From Date</label>
+                            <input type="date" id="fromDate" class="p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">To Date</label>
+                            <input type="date" id="toDate" class="p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="button" onclick="selectRange()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                Select Range
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 mb-4">
+                        <button type="button" onclick="deselectAll()" class="bg-yellow-500 text-white px-4 py-1 rounded-md hover:bg-yellow-600">Deselect All</button>
+                        <button type="button" onclick="selectAll()" class="bg-green-600 text-white px-4 py-1 rounded-md hover:bg-green-700">Select All</button>
+                    </div>
+
+                    <p class="text-sm text-gray-600 mb-2">Click on individual dates to select/deselect:</p>
+                    <div id="dateList" class="flex flex-wrap gap-2 mb-6"></div>
+                    <div>
+                        <h3 class="text-lg font-semibold mt-6 mb-2">Selected Dates:</h3>
+                        <div id="selectedDatesDisplay" class="flex flex-wrap gap-2 text-sm text-gray-700"></div>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <button type="button" onclick="goToGameSection()" class="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700">
+                            Previous
+                        </button>
+                        <button type="button" onclick="submitFinal()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+                            Submit All
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        
+        <div id="messageBox" class="fixed top-4 right-4 w-80 z-50"></div>
+        <template id="messageTemplate">
+            <div class="message bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative shadow-lg mb-4" role="alert">
+                <strong class="font-bold">Notice: </strong>
+                <span class="block sm:inline message-text"></span>
+                <span onclick="this.parentElement.remove()" class="absolute top-1 right-2 text-xl font-bold cursor-pointer text-blue-700 hover:text-blue-900">&times;</span>
+            </div>
+        </template>
+
+        <script src="admin.js"></script>
+    </body>
+    </html>
