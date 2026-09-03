@@ -2,7 +2,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 
 function sendEmail($to, $subject, $messageText) {
-    $client = new Google_Client();
+    $client = new \Google\Client();
     $client->setApplicationName("Gmail API - PHP");
     $client->setScopes(Google_Service_Gmail::GMAIL_SEND);
     $client->setAuthConfig('credentials.json');
